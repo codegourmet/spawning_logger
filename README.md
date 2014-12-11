@@ -1,10 +1,16 @@
+# SpawningLogger
+
 A Logger that is able to spawn sub-loggers.
 
-Sub-loggers are created with a different filename.
-Also supports a preset logfile subdirectory in case you create many subloggers.
+## General
 
-Only the constructor is modified and the spawning factory method added,
-everything else is delegated to the ruby stdlib ::Logger class.
+Example use case: you run a server and want to log different clients each into their own logfile (for example if you got a huge amount of clients connecting).
+
+This logger can spawn sub-loggers with different files, each of those file's name is derived from the main logger's file and the sub-logger's id.
+
+Also supports a preset logfile subdirectory in case you create many subloggers (for example you might be interested in splitting development, production, test logs into subdirectories).
+
+Only the constructor is modified and the spawning factory method added, everything else is delegated to the ruby stdlib ::Logger class.
 
 ## Examples:
 
