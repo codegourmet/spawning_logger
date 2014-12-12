@@ -14,6 +14,17 @@ Only the constructor is modified and the spawning factory method added, everythi
 
 ## Examples:
 
+### quick-n-dirty:
+```ruby
+require 'spawning_logger'
+logger = SpawningLogger.new('server.log')
+
+logger.info('special test message')
+logger.spawn('special').info('special test message')
+
+# => writes message into ./server.log and ./server_special.log
+```
+
 ### 1) usage same as ::Logger
 
 ```ruby
