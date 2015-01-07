@@ -53,6 +53,29 @@
 # # => creates ./log/production/server.log
 # # => creates ./log/production/server_worker_1.log
 # ```
+#
+#
+# ### 5) log into main logfile and into a child logger's logfile
+#
+# ```ruby
+# logger = SpawningLogger.new('log/server.log')
+# logger.send_self_and_spawn(:error, "worker_1", "server shutdown")
+#
+# # => "server shutdown" will show up in server.log and in server_worker_1.log
+# ```
+#
+#
+# ### 6) logger spawning recursion
+#
+# ```ruby
+# logger = SpawningLogger.new('log/server.log')
+# child = logger.spawn('child1')
+# sub_child = child.spawn('child2')
+#
+# # => creates ./log/production/server.log
+# # => creates ./log/production/server_child1.log
+# # => creates ./log/production/server_child1_child2.log
+# ```
 
 require 'logger'
 
@@ -101,6 +124,14 @@ class SpawningLogger < ::Logger
     @child_loggers[child_name]
   end
 
+  # logs into the main logfile and also logs into a spawned logfile.
+  # @param method The method name to call, like :error, :info, :debug, ...
+  # @param message the message to send to both loggers
+  def send_self_and_spawn(child_name, method, message)
+    self.send(method, message)
+    self.spawn(child_name).send(method, message)
+  end
+
   protected
 
     # creates a logger for child_name. uses child_name and
@@ -122,7 +153,7 @@ class SpawningLogger < ::Logger
       file_name = file_basename + File.extname(@file_name)
 
       file_path = File.join(@log_dir, file_name)
-      ::Logger.new(file_path)
+      self.class.new(file_path)
     end
 
 end

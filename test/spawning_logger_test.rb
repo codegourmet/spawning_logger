@@ -52,6 +52,25 @@ class SpawningLoggerTest < MiniTest::Test
     end
   end
 
+  def test_send_self_and_spawn_calls_both
+    logger = SpawningLogger.new(@logfile_path)
+    logger.send_self_and_spawn("childid", :error, "test_self_and_spawn_calls_both")
+
+    # make sure log message shows up in main logfile and in spawned logfile
+    [@logfile_path, File.join(@log_dir, 'test_file_childid.log')].each do |path|
+      result = File.read(path)
+      assert_match(/test_self_and_spawn_calls_both/, result)
+    end
+  end
+
+  def test_child_loggers_can_spawn_their_own_child_loggers
+    child = SpawningLogger.new(@logfile_path).spawn('child1')
+    sub_child = child.spawn('child2')
+
+    assert_kind_of(::Logger, sub_child)
+    assert File.exist?(File.join(@log_dir, 'test_file_child1_child2.log'))
+  end
+
   def test_creates_child_logger_only_once
     skip "NYI"
     # TODO
