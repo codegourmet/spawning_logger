@@ -10,7 +10,8 @@ This logger can spawn sub-loggers with different files, each of those file's nam
 
 Also supports a preset logfile subdirectory in case you create many subloggers (for example you might be interested in splitting development, production, test logs into subdirectories).
 
-Only the constructor is modified and the spawning factory method added, everything else is delegated to the ruby stdlib ::Logger class.  
+Only the constructor is modified and the spawning factory method added, everything else is delegated to the ruby stdlib ::Logger class.
+
 ## Examples:
 
 ### quick-n-dirty:
@@ -75,7 +76,7 @@ child_logger = logger.spawn('1')
 
 ```ruby
 logger = SpawningLogger.new('log/server.log')
-logger.send_self_and_spawn(:error, "worker_1", "server shutdown")
+logger.send_self_and_spawn('worker_1', :error, 'server shutdown')
 
 # => "server shutdown" will show up in server.log and in server_worker_1.log
 ```

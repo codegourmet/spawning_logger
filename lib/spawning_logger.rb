@@ -59,7 +59,7 @@
 #
 # ```ruby
 # logger = SpawningLogger.new('log/server.log')
-# logger.send_self_and_spawn(:error, "worker_1", "server shutdown")
+# logger.send_self_and_spawn('worker_1', :error, 'server shutdown')
 #
 # # => "server shutdown" will show up in server.log and in server_worker_1.log
 # ```
@@ -125,7 +125,8 @@ class SpawningLogger < ::Logger
   end
 
   # logs into the main logfile and also logs into a spawned logfile.
-  # @param method The method name to call, like :error, :info, :debug, ...
+  # @param child_name the child to spawn and log into
+  # @param method the method name to call, like :error, :info, :debug, ...
   # @param message the message to send to both loggers
   def send_self_and_spawn(child_name, method, message)
     self.send(method, message)
