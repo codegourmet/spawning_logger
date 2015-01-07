@@ -52,9 +52,9 @@ class SpawningLoggerTest < MiniTest::Test
     end
   end
 
-  def test_send_self_and_spawn_calls_both
+  def test_self_and_spawn_calls_both
     logger = SpawningLogger.new(@logfile_path)
-    logger.send_self_and_spawn("childid", :error, "test_self_and_spawn_calls_both")
+    logger.self_and_spawn("childid", :error, "test_self_and_spawn_calls_both")
 
     # make sure log message shows up in main logfile and in spawned logfile
     [@logfile_path, File.join(@log_dir, 'test_file_childid.log')].each do |path|

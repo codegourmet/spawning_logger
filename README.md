@@ -76,7 +76,11 @@ child_logger = logger.spawn('1')
 
 ```ruby
 logger = SpawningLogger.new('log/server.log')
-logger.send_self_and_spawn('worker_1', :error, 'server shutdown')
+logger.self_and_spawn('worker_1', :error, 'server shutdown')
+
+# this is a shortcut for:
+logger.error('server shutdown')
+logger.spawn('worker_1').error('server shutdown')
 
 # => "server shutdown" will show up in server.log and in server_worker_1.log
 ```
