@@ -106,11 +106,14 @@ class SpawningLogger < ::Logger
   end
 
   # creates the logfile inside a subdir (optional).
-  def initialize(file_path, subdir = nil)
+  def initialize(file_path, debug = false)
     file_path = File.expand_path(file_path)
 
-    @log_dir = File.dirname(file_path)
+    @log_base_dir = File.dirname(file_path)
+
+    @log_dir = @log_base_dir
     @log_dir = File.join(@log_dir, @@subdir) unless @@subdir.nil?
+
     FileUtils.mkdir_p(@log_dir) if !Dir.exist?(@log_dir)
 
     @file_name = File.basename(file_path)
@@ -157,7 +160,8 @@ class SpawningLogger < ::Logger
       # add extension
       file_name = file_basename + File.extname(@file_name)
 
-      file_path = File.join(@log_dir, file_name)
+      # use base dir without subdir, because child logger adds it itself
+      file_path = File.join(@log_base_dir, file_name)
       self.class.new(file_path)
     end
 

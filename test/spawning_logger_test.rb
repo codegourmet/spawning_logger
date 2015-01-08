@@ -4,16 +4,18 @@ require_relative "../lib/spawning_logger"
 class SpawningLoggerTest < MiniTest::Test
 
   def setup
-    @log_dir = Dir.mktmpdir('spawning_logger_test')
+    @log_base_dir = Dir.mktmpdir('spawning_logger_test')
+    @log_dir = File.join(@log_base_dir, 'test_subdir')
+
     @logfile_name = 'test_file.log'
-    @logfile_path = File.join(@log_dir, @logfile_name)
+    @logfile_path = File.join(@log_base_dir, @logfile_name)
     @child_id = 'childid'
 
     reset_logger_config
   end
 
   def teardown
-    FileUtils.remove_entry(@log_dir)
+    FileUtils.remove_entry(@log_base_dir)
     reset_logger_config
   end
 
@@ -23,9 +25,9 @@ class SpawningLoggerTest < MiniTest::Test
     SpawningLogger.configure do |config|
       config.subdir = subdir
     end
-    SpawningLogger.new(@logfile_path)
+    SpawningLogger.new(@logfile_path, true)
 
-    expected_dir = File.join(@log_dir, subdir)
+    expected_dir = File.join(@log_base_dir, subdir)
     expected_file = File.join(expected_dir, @logfile_name)
 
     assert File.exist?(expected_file)
@@ -33,6 +35,8 @@ class SpawningLoggerTest < MiniTest::Test
   end
 
   def test_spawn_interface_yields_logger_for_child_id
+    logger = SpawningLogger.new(@logfile_path)
+    logger.spawn('childid')
     assert_creates_log_file('test_file_childid.log')
   end
 
@@ -40,6 +44,9 @@ class SpawningLoggerTest < MiniTest::Test
     SpawningLogger.configure do |config|
       config.child_prefix = 'childprefix'
     end
+
+    logger = SpawningLogger.new(@logfile_path)
+    logger.spawn('childid')
 
     assert_creates_log_file('test_file_childprefix_childid.log')
   end
@@ -56,8 +63,10 @@ class SpawningLoggerTest < MiniTest::Test
     logger = SpawningLogger.new(@logfile_path)
     logger.self_and_spawn("childid", :error, "test_self_and_spawn_calls_both")
 
-    # make sure log message shows up in main logfile and in spawned logfile
-    [@logfile_path, File.join(@log_dir, 'test_file_childid.log')].each do |path|
+    parent_path = File.join(@log_dir, @logfile_name)
+    child_path = File.join(@log_dir, 'test_file_childid.log')
+
+    [parent_path, child_path].each do |path|
       result = File.read(path)
       assert_match(/test_self_and_spawn_calls_both/, result)
     end
@@ -81,11 +90,6 @@ class SpawningLoggerTest < MiniTest::Test
   protected
 
     def assert_creates_log_file(file_name)
-      logger = SpawningLogger.new(@logfile_path)
-      child_logger = logger.spawn(@child_id)
-
-      assert_kind_of(::Logger, child_logger)
-
       expected_path = File.join(@log_dir, file_name)
       assert File.exist?(expected_path)
     end
@@ -93,7 +97,7 @@ class SpawningLoggerTest < MiniTest::Test
     def reset_logger_config
       SpawningLogger.configure do |config|
         config.child_prefix = nil
-        config.subdir = nil
+        config.subdir = 'test_subdir'
       end
     end
 
